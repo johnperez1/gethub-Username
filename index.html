@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI-PIVEST – Portfolio Dashboard</title>
+  <link rel="stylesheet" href="src/styles.css" />
+</head>
+<body>
+
+  <!-- ===== Header ===== -->
+  <header>
+    <h1>AI-<span>PIVEST</span> Portfolio</h1>
+    <!-- Export Component -->
+    <div class="export-container" id="export-section">
+      <select id="export-format" aria-label="Select export format">
+        <option value="csv">CSV</option>
+        <option value="json">JSON</option>
+      </select>
+      <button id="export-btn" aria-label="Export portfolio data">
+        ⬇ Export Portfolio
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== Summary Cards ===== -->
+  <div class="summary-grid" id="summary-grid">
+    <!-- Populated by JS -->
+  </div>
+
+  <!-- ===== Holdings Table ===== -->
+  <div class="section">
+    <div class="section-header">
+      <h2>Holdings</h2>
+    </div>
+    <div class="table-wrapper">
+      <table id="holdings-table">
+        <thead>
+          <tr>
+            <th>Symbol</th>
+            <th>Name</th>
+            <th>Quantity</th>
+            <th>Current Price</th>
+            <th>Total Value</th>
+            <th>Gain / Loss</th>
+            <th>Gain / Loss %</th>
+          </tr>
+        </thead>
+        <tbody id="holdings-body">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== Transaction History Table ===== -->
+  <div class="section">
+    <div class="section-header">
+      <h2>Transaction History</h2>
+    </div>
+    <div class="table-wrapper">
+      <table id="transactions-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Symbol</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Total</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="transactions-body">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== Toast Notification Container ===== -->
+  <div id="toast-container" role="status" aria-live="polite"></div>
+
+  <!-- ===== Scripts ===== -->
+  <script src="src/portfolioExportUtils.js"></script>
+  <script src="src/exportService.js"></script>
+  <script>
+    // -------------------------------------------------------
+    // Sample portfolio data (simulated – no sensitive fields)
+    // -------------------------------------------------------
+    const portfolioData = {
+      portfolioName: 'My Simulated Portfolio',
+      totalValue: 54320.75,
+      currency: 'USD',
+      holdings: [
+        {
+          symbol: 'BTC',
+          name: 'Bitcoin',
+          quantity: 0.85,
+          currentPrice: 42500,
+          totalValue: 36125,
+          gainLoss: 6125,
+          gainLossPercent: 20.4,
+        },
+        {
+          symbol: 'ETH',
+          name: 'Ethereum',
+          quantity: 4.2,
+          currentPrice: 2800,
+          totalValue: 11760,
+          gainLoss: -240,
+          gainLossPercent: -2.0,
+        },
+        {
+          symbol: 'SOL',
+          name: 'Solana',
+          quantity: 28,
+          currentPrice: 230,
+          totalValue: 6440,
+          gainLoss: 1640,
+          gainLossPercent: 34.2,
+        },
+      ],
+      transactions: [
+        {
+          date: '2024-03-10',
+          type: 'BUY',
+          symbol: 'BTC',
+          quantity: 0.5,
+          price: 41000,
+          total: 20500,
+          status: 'COMPLETED',
+        },
+        {
+          date: '2024-03-12',
+          type: 'BUY',
+          symbol: 'ETH',
+          quantity: 2.0,
+          price: 2900,
+          total: 5800,
+          status: 'COMPLETED',
+        },
+        {
+          date: '2024-03-14',
+          type: 'SELL',
+          symbol: 'SOL',
+          quantity: 5,
+          price: 210,
+          total: 1050,
+          status: 'COMPLETED',
+        },
+        {
+          date: '2024-03-16',
+          type: 'BUY',
+          symbol: 'BTC',
+          quantity: 0.35,
+          price: 43000,
+          total: 15050,
+          status: 'COMPLETED',
+        },
+      ],
+    };
+
+    // -------------------------------------------------------
+    // Render summary cards
+    // -------------------------------------------------------
+    function renderSummary(data) {
+      const grid = document.getElementById('summary-grid');
+      const totalGainLoss = data.holdings.reduce((sum, h) => sum + (h.gainLoss || 0), 0);
+      const isPositive = totalGainLoss >= 0;
+
+      const cards = [
+        { label: 'Portfolio Name', value: data.portfolioName, cls: '' },
+        { label: 'Total Value', value: '$' + data.totalValue.toLocaleString(), cls: '' },
+        {
+          label: 'Overall Gain / Loss',
+          value: (isPositive ? '+$' : '-$') + Math.abs(totalGainLoss).toLocaleString(),
+          cls: isPositive ? 'gain' : 'loss',
+        },
+        { label: 'Currency', value: data.currency, cls: '' },
+      ];
+
+      grid.innerHTML = cards
+        .map(
+          (c) =>
+            `<div class="card">
+              <div class="card-label">${c.label}</div>
+              <div class="card-value ${c.cls}">${c.value}</div>
+            </div>`
+        )
+        .join('');
+    }
+
+    // -------------------------------------------------------
+    // Render holdings table
+    // -------------------------------------------------------
+    function renderHoldings(holdings) {
+      const tbody = document.getElementById('holdings-body');
+      tbody.innerHTML = holdings
+        .map((h) => {
+          const gainCls = h.gainLoss >= 0 ? 'gain' : 'loss';
+          const sign = h.gainLoss >= 0 ? '+' : '';
+          return `<tr>
+            <td><strong>${h.symbol}</strong></td>
+            <td>${h.name}</td>
+            <td>${h.quantity}</td>
+            <td>$${h.currentPrice.toLocaleString()}</td>
+            <td>$${h.totalValue.toLocaleString()}</td>
+            <td class="${gainCls}">${sign}$${Math.abs(h.gainLoss).toLocaleString()}</td>
+            <td class="${gainCls}">${sign}${h.gainLossPercent}%</td>
+          </tr>`;
+        })
+        .join('');
+    }
+
+    // -------------------------------------------------------
+    // Render transactions table
+    // -------------------------------------------------------
+    function renderTransactions(transactions) {
+      const tbody = document.getElementById('transactions-body');
+      tbody.innerHTML = transactions
+        .map((tx) => {
+          const typeCls = tx.type === 'BUY' ? 'badge-buy' : 'badge-sell';
+          return `<tr>
+            <td>${tx.date}</td>
+            <td><span class="badge ${typeCls}">${tx.type}</span></td>
+            <td>${tx.symbol}</td>
+            <td>${tx.quantity}</td>
+            <td>$${tx.price.toLocaleString()}</td>
+            <td>$${tx.total.toLocaleString()}</td>
+            <td><span class="badge badge-completed">${tx.status}</span></td>
+          </tr>`;
+        })
+        .join('');
+    }
+
+    // -------------------------------------------------------
+    // Toast notification
+    // -------------------------------------------------------
+    function showToast(message, type) {
+      const container = document.getElementById('toast-container');
+      const icon = type === 'success' ? '✅' : '❌';
+      const toast = document.createElement('div');
+      toast.className = 'toast ' + type;
+      toast.textContent = icon + ' ' + message;
+      container.appendChild(toast);
+
+      // Auto-remove after animation completes (3s display + 0.4s fade)
+      setTimeout(() => {
+        if (toast.parentNode) toast.parentNode.removeChild(toast);
+      }, 3600);
+    }
+
+    // -------------------------------------------------------
+    // Export button handler
+    // -------------------------------------------------------
+    document.getElementById('export-btn').addEventListener('click', function () {
+      const format = document.getElementById('export-format').value;
+      const btn = this;
+
+      btn.disabled = true;
+      btn.textContent = '⏳ Exporting…';
+
+      // Small async delay to allow the UI to update before download triggers
+      setTimeout(function () {
+        let result;
+        if (format === 'csv') {
+          result = exportAsCSV(portfolioData);
+        } else {
+          result = exportAsJSON(portfolioData);
+        }
+
+        showToast(result.message, result.success ? 'success' : 'error');
+
+        btn.disabled = false;
+        btn.textContent = '⬇ Export Portfolio';
+      }, 100);
+    });
+
+    // -------------------------------------------------------
+    // Initialise dashboard
+    // -------------------------------------------------------
+    renderSummary(portfolioData);
+    renderHoldings(portfolioData.holdings);
+    renderTransactions(portfolioData.transactions);
+  </script>
+</body>
+</html>

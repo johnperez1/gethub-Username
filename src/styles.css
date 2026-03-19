@@ -1,0 +1,256 @@
+/* =========================================================
+   Portfolio Dashboard – styles.css
+   ========================================================= */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --color-bg: #0f1117;
+  --color-surface: #1a1d27;
+  --color-surface-2: #22263a;
+  --color-border: #2e3350;
+  --color-primary: #4f8ef7;
+  --color-primary-hover: #3a7ae8;
+  --color-success: #2ecc71;
+  --color-danger: #e74c3c;
+  --color-text: #e8eaf6;
+  --color-text-muted: #8892b0;
+  --color-gain: #2ecc71;
+  --color-loss: #e74c3c;
+  --radius: 10px;
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  min-height: 100vh;
+  padding: 24px 16px;
+}
+
+/* ---- Header ---- */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+header h1 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.5px;
+}
+
+header h1 span {
+  color: var(--color-primary);
+}
+
+/* ---- Summary cards ---- */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  box-shadow: var(--shadow);
+}
+
+.card-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--color-text-muted);
+  margin-bottom: 8px;
+}
+
+.card-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.card-value.gain { color: var(--color-gain); }
+.card-value.loss { color: var(--color-loss); }
+
+/* ---- Table section ---- */
+.section {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 28px;
+  overflow: hidden;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.section-header h2 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+thead th {
+  text-align: left;
+  padding: 12px 16px;
+  background: var(--color-surface-2);
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  white-space: nowrap;
+}
+
+tbody tr {
+  border-top: 1px solid var(--color-border);
+  transition: background 0.15s;
+}
+
+tbody tr:hover {
+  background: var(--color-surface-2);
+}
+
+tbody td {
+  padding: 14px 16px;
+  white-space: nowrap;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge-buy  { background: rgba(46, 204, 113, 0.2); color: var(--color-gain); }
+.badge-sell { background: rgba(231, 76, 60, 0.2);  color: var(--color-loss); }
+.badge-completed { background: rgba(79, 142, 247, 0.2); color: var(--color-primary); }
+
+/* ---- Export component ---- */
+.export-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+#export-format {
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 7px 12px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  outline: none;
+}
+
+#export-format:focus {
+  border-color: var(--color-primary);
+}
+
+#export-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 18px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+#export-btn:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+#export-btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+#export-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ---- Toast notifications ---- */
+#toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  animation: slideIn 0.3s ease, fadeOut 0.4s ease 3s forwards;
+  pointer-events: auto;
+  max-width: 360px;
+}
+
+.toast.success {
+  background: #1b3a2d;
+  border: 1px solid var(--color-success);
+  color: var(--color-success);
+}
+
+.toast.error {
+  background: #3a1b1b;
+  border: 1px solid var(--color-danger);
+  color: var(--color-danger);
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; transform: translateY(10px); }
+}
